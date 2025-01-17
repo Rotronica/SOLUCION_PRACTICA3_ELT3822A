@@ -1,0 +1,23 @@
+ÀÄCONTROL DE SERVOS POR INTERRUPCION RBI
+   ÃÄMAIN  0/23  Ram=0
+   ³  ÃÄ@cinit1  (Inline)  Ram=0
+   ³  ÀÄservo_init  0/14  Ram=0
+   ÃÄtimer_0  0/65  Ram=0
+   ÀÄinterrupcion_RBI  0/39  Ram=1
+      ÃÄservo_1_write  0/18  Ram=1
+      ³  ÀÄmap_int  0/127  Ram=14
+      ³     ÃÄ@MUL1616  (Inline)  Ram=5
+      ³     ÀÄ@DIV1616  (Inline)  Ram=5
+      ÃÄservo_2_write  0/18  Ram=1
+      ³  ÀÄmap_int  0/127  Ram=14
+      ³     ÀÄ*
+      ÃÄservo_3_write  0/18  Ram=1
+      ³  ÀÄmap_int  0/127  Ram=14
+      ³     ÀÄ*
+      ÀÄlimpiar  (Inline)  Ram=0
+         ÃÄservo_1_write  0/18  Ram=1
+         ³  ÀÄ*
+         ÃÄservo_2_write  0/18  Ram=1
+         ³  ÀÄ*
+         ÀÄservo_3_write  0/18  Ram=1
+            ÀÄ*

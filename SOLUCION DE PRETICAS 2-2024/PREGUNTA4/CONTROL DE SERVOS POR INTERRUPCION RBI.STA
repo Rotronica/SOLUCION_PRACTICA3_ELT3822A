@@ -1,0 +1,59 @@
+
+ROM used:   376/8192 (5%)
+            376/8192 (5%) including unused fragments
+
+            0.4 Average locations per line
+            7.8 Average locations per statement
+
+RAM used:   24/368 (7%) at main() level
+            44/368 (12%) worst case
+
+Stack used: 4 worst case (1 in main + 3 for interrupts)
+Stack size: 8
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+   44    21  44  CONTROL DE SERVOS POR INTERRUPCION RBI.c
+  671     0   0  C:\Program Files (x86)\PICC\Devices\16f877a.h
+  148    27  56  C:\Program Files (x86)\PICC\Drivers\servo_st.c
+----- -----
+  863    48 Total
+
+Page ROM  %  RAM   Vol Diff  Functions:
+---- --- --- ---   --- ----  ----------
+0     65  17    0   391  4.2  timer_0
+0     14   4    0    78  1.6  servo_init
+0    127  34   14   156  5.1  map_int
+ Inline         5    78  1.6  @MUL1616
+ Inline         5   154  5.5  @DIV1616
+0     18   5    1    85  2.3  servo_1_write
+0     18   5    1    85  2.3  servo_2_write
+0     18   5    1    83  2.5  servo_3_write
+0     39  10    1   230  2.3  interrupcion_RBI
+0     23   6    0    80  1.6  MAIN
+ Inline         0    48  1.1  limpiar
+ Inline         0   265  5.0  @cinit1
+
+Program metrics:
+    Functions               12
+    Statements              48
+    Comments                149
+    Volume (V)              3018
+    Difficulty (D)          34.3
+    Effort to implement (E) 103580
+    Time to implement (T)   1 hours, 36 minutes
+    Est Delivered Bugs (B)  1
+    Cyclomatic Complexity   11
+    Maintainability (MI)    83
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00003     4  0  
+00004-00035    50  0  
+00036-007FF   322  1672  
+00800-00FFF     0  2048  
+01000-017FF     0  2048  
+01800-01FFF     0  2048  
+
+
+

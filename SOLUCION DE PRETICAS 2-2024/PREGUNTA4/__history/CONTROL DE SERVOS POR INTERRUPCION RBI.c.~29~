@@ -1,0 +1,43 @@
+#include <16f877a.h>
+#fuses xt,nowdt,put,noprotect,nolvp
+#use  delay(clock=4M)
+#use standard_io(d)
+//CANALES DEL SERVO
+#DEFINE USE_SERVO_1
+#DEFINE USE_SERVO_2
+#DEFINE USE_SERVO_3
+#define USE_SERVO_4
+//PINES A ELEGIR PARA LA SEÑAL PWM
+#DEFINE SERVO_1 PIN_D0
+#DEFINE SERVO_2 PIN_D1
+#DEFINE SERVO_3 PIN_D2
+#define SERVO_4 PIN_D3
+#define pulsador_1 PIN_B4
+#define pulsador_2 PIN_B5
+#define pulsador_3 PIN_B6
+#define pulsador_4 PIN_B7
+#include <servo_st.c>
+void limpiar();
+#INT_RB
+void interrupcion_RBI(){
+ if(input(pulsador_1)==0){SERVO_1_WRITE(90);}
+ if(input(pulsador_2)==0){SERVO_2_WRITE(90);}
+ if(input(pulsador_3)==0){SERVO_3_WRITE(90);}
+ if(input(pulsador_4)==0){SERVO_4_WRITE(90);}
+}
+void main(){
+ servo_init();
+ port_b_pullups(TRUE);
+ enable_interrupts(int_RB);
+ enable_interrupts(GLOBAL);
+ while(true){
+  limpiar();
+  delay_ms(20);
+ }
+}
+void limpiar(){
+ SERVO_1_WRITE(0);
+ SERVO_2_WRITE(0);
+ SERVO_3_WRITE(0);
+ SERVO_4_WRITE(0);
+}

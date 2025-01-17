@@ -1,0 +1,61 @@
+__S0 800 0 ABS 0
+__S1 0 0 ABS 0
+__S3 0 0 ABS 0
+__Hconfig 2008 0 CONFIG 4
+__Lconfig 0 0 CONFIG 4
+__HCODE D 0 ABS 0
+__LCODE 0 0 ABS 0
+__Hcode 1A 0 ABS 0
+__Lcode 1A 0 ABS 0
+__Hdata 1A 0 ABS 0
+__Ldata 1A 0 ABS 0
+__HINT_VECT 1A 0 ABS 0
+__LINT_VECT 1A 0 ABS 0
+__Hudata_bank0 1A 0 ABS 0
+__Ludata_bank0 1A 0 ABS 0
+__Hudata_shr 1A 0 ABS 0
+__Ludata_shr 1A 0 ABS 0
+__HRESET_VECT 1A 0 ABS 0
+__LRESET_VECT 1A 0 ABS 0
+__H__absolute__ 0 0 ABS 0
+__L__absolute__ 0 0 ABS 0
+__Hedata 1A 0 ABS 0
+__Ledata 1A 0 ABS 0
+__Hudata 1A 0 ABS 0
+__Ludata 1A 0 ABS 0
+__Hudata_bank1 1A 0 ABS 0
+__Ludata_bank1 1A 0 ABS 0
+__Hspace_0 800 0 ABS 0
+__Lspace_0 0 0 ABS 0
+__Hspace_1 0 0 ABS 0
+__Lspace_1 0 0 ABS 0
+__Hspace_3 0 0 ABS 0
+__Lspace_3 0 0 ABS 0
+__Hspace_4 400F 0 ABS 0
+__Lspace_4 0 0 ABS 0
+__Hudata_bank2 1A 0 ABS 0
+__Ludata_bank2 1A 0 ABS 0
+__Hudata_bank3 1A 0 ABS 0
+__Ludata_bank3 1A 0 ABS 0
+%segments
+RESET_VECT FFA FFF CODE FFA 0
+INT_VECT FF8 FF9 CODE FF8 0
+%locals
+build/default/debug/REFLEJO_ENPORTC.o
+REFLEJO_ENPORTC.s
+28 7FD 0 CODE 0
+29 7FF 0 CODE 0
+32 7FC 0 CODE 0
+35 0 0 ABS 0
+36 1 0 ABS 0
+37 2 0 ABS 0
+38 3 0 ABS 0
+39 4 0 ABS 0
+40 5 0 ABS 0
+41 6 0 ABS 0
+42 7 0 ABS 0
+43 8 0 ABS 0
+44 9 0 ABS 0
+46 A 0 ABS 0
+47 B 0 ABS 0
+48 C 0 ABS 0

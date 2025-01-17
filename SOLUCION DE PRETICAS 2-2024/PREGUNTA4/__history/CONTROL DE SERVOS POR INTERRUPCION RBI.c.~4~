@@ -1,0 +1,22 @@
+#include <16f877a.h>
+#fuses xt,nowdt,put,noprotect,nolvp
+#use  delay(clock=4M)
+#use standard_io(d)
+//CANALES DEL SERVO
+#DEFINE USE_SERVO_1
+#DEFINE USE_SERVO_2
+#DEFINE USE_SERVO_3
+//PINES A ELEGIR PARA LA SEÑAL PWM
+#DEFINE SERVO_1 PIN_D0
+#DEFINE SERVO_2 PIN_D1
+#DEFINE SERVO_3 PIN_D2
+#include <servo_st.c>
+void main(){
+ servo_init();
+ while(true){
+ servo_1_write(90);
+ delay_ms(1000);
+ servo_1_write(180);
+ delay_ms(1000);
+ }
+}

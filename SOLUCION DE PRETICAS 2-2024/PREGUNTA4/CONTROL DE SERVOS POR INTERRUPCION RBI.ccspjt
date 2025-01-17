@@ -1,0 +1,25 @@
+[PROJECT]
+Target=CONTROL DE SERVOS POR INTERRUPCION RBI.hex
+Processor_Text=PIC16F877A
+CCSVersion=5.015
+Compiler=PCM
+[Target Data]
+FileList=CONTROL DE SERVOS POR INTERRUPCION RBI.c
+[Directories]
+Include=C:\Program Files (x86)\PICC\Devices\;C:\Program Files (x86)\PICC\Drivers\
+[CONTROL DE SERVOS POR INTERRUPCION RBI.c]
+Type=4
+[mru-list]
+1=CONTROL DE SERVOS POR INTERRUPCION RBI.c
+[Opened Files]
+1=C:\Users\USUARIO\Desktop\LENGUAJE C\PIC C COMPILER\LCD.c
+2=C:\Program Files (x86)\PICC\Drivers\lcd.c
+3=..\..\..\MICRO\PROYECTOS\CINTA_TRANSPORTADORA_EN_C.c
+4=C:\Program Files (x86)\PICC\Drivers\servo_st.c
+5=CONTROL DE SERVOS POR INTERRUPCION RBI.c
+6=..\..\..\MICRO\LENGUAJE C\INTERRUPCION POR RBI RB4-RB7.c
+7=
+8=
+[Units]
+Count=1
+1=CONTROL DE SERVOS POR INTERRUPCION RBI (main)

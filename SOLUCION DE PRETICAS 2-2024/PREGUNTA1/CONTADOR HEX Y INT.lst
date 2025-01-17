@@ -1,0 +1,864 @@
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;Autor: Calle Condori Rodrigo
+                      00002 ;Realizar el diagrama de flujo y la codificación en ensamblador, 
+                      00003 ;un contador hexadecimal del 000h al FFFh, el conteo inicia con un pulsador
+                      00004 ;pull-down conectado al pin RC0, el conteo se interrumpe cada vez que se 
+                      00005 ;presiona un pulsador pull-down conectado al pin RB0 
+                      00006 ;generando una interrupción externa RB0(INT), cuando se genere la 
+                      00007 ;interrupción, debe encenderse un motor DC, el programa vuelve y continúa 
+                      00008 ;con el programa principal cuando se deja de presionar el pulsador 
+                      00009 ;conectado a RB0. Utilizar displays de cátodo común.
+                      00010 
+2007   3F31           00011    __CONFIG _XT_OSC & _WDTE_OFF & _PWRTE_ON & _CP_OFF & _LVP_OFF & _BOREN_OFF
+                      00012    LIST P=16F877A
+                      00013    #INCLUDE <P16F877A.INC>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F877A processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00566         LIST
+                      00014    CBLOCK 0X20
+  00000020            00015    UNIDAD
+  00000021            00016    DECENA
+  00000022            00017    CENTENA
+  00000023            00018    AUX
+                      00019    ENDC
+                      00020    #DEFINE  STAR       PORTC,0
+                      00021    #DEFINE  DISPLAY1   PORTC,1
+                      00022    #DEFINE  DISPLAY2   PORTC,2
+                      00023    #DEFINE  DISPLAY3   PORTC,3
+                      00024    #DEFINE  MOTOR      PORTC,4
+                      00025    #DEFINE  PULSADOR   PORTB,0
+0000                  00026                  ORG    0X00
+0000   2805           00027                  GOTO   CONFIGURAR
+0004                  00028                  ORG    0X04
+0004   285C           00029                  GOTO   INT_RB0
+0005                  00030 CONFIGURAR:
+0005   1683           00031                  BSF    STATUS,RP0
+0006   1303           00032                  BCF    STATUS,RP1
+0007   3001           00033                  MOVLW  0X01
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0008   0087           00034                  MOVWF  TRISC
+0009   3001           00035                  MOVLW  0X01
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0086           00036                  MOVWF  TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   1701           00037                  BSF    OPTION_REG,INTEDG
+000C   1283           00038                  BCF    STATUS,RP0
+000D   3090           00039                  MOVLW  B'10010000'
+000E   008B           00040                  MOVWF  INTCON
+000F   0186           00041                  CLRF   PORTB
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0010   0187           00042                  CLRF   PORTC
+0011   01A0           00043                  CLRF   UNIDAD
+0012   01A1           00044                  CLRF   DECENA
+0013   01A2           00045                  CLRF   CENTENA
+                      00046 ;----------------PRINIPAL--------------
+0014                  00047 MAIN:
+0014   201A           00048                  CALL   VISUALIZAR
+0015   1C07           00049                  BTFSS  STAR
+0016   2814           00050                  GOTO   MAIN
+0017                  00051 BUCLE:
+0017   201A           00052                  CALL   VISUALIZAR
+0018   2041           00053                  CALL   INTERNO
+0019   2817           00054                  GOTO   BUCLE
+                      00055 ;--------------------------------------
+001A                  00056 VISUALIZAR:
+001A   1487           00057                  BSF    DISPLAY1
+001B   1107           00058                  BCF    DISPLAY2
+001C   1187           00059                  BCF    DISPLAY3
+001D   0820           00060                  MOVF   UNIDAD,W
+001E   2030           00061                  CALL   TABLA
+001F   0086           00062                  MOVWF  PORTB
+0020   2084           00063                  CALL   RETARDO_10MS
+                      00064 
+0021   1087           00065                  BCF    DISPLAY1
+0022   1507           00066                  BSF    DISPLAY2
+0023   1187           00067                  BCF    DISPLAY3
+0024   0821           00068                  MOVF   DECENA,W
+0025   2030           00069                  CALL   TABLA
+0026   0086           00070                  MOVWF  PORTB
+0027   2084           00071                  CALL   RETARDO_10MS
+                      00072 
+0028   1087           00073                  BCF    DISPLAY1
+0029   1107           00074                  BCF    DISPLAY2
+002A   1587           00075                  BSF    DISPLAY3
+002B   0822           00076                  MOVF   CENTENA,W
+002C   2030           00077                  CALL   TABLA
+002D   0086           00078                  MOVWF  PORTB
+002E   2084           00079                  CALL   RETARDO_10MS
+002F   0008           00080                  RETURN
+                      00081 ;TABLA NUMEROS HEX
+0030                  00082 TABLA:
+0030   0782           00083                  ADDWF  PCL,F
+0031   347E           00084                  RETLW  B'01111110'   ;0
+0032   340C           00085                  RETLW  B'00001100'   ;1
+0033   34B6           00086                  RETLW  B'10110110'   ;2
+0034   349E           00087                  RETLW  B'10011110'   ;3
+0035   34CC           00088                  RETLW  B'11001100'   ;4
+0036   34DA           00089                  RETLW  B'11011010'   ;5
+0037   34FA           00090                  RETLW  B'11111010'   ;6
+0038   340E           00091                  RETLW  B'00001110'   ;7
+0039   34FE           00092                  RETLW  B'11111110'   ;8
+003A   34DE           00093                  RETLW  B'11011110'   ;9
+003B   34EE           00094                  RETLW  B'11101110'   ;A
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+003C   34F8           00095                  RETLW  B'11111000'   ;B
+003D   3472           00096                  RETLW  B'01110010'   ;C
+003E   34BC           00097                  RETLW  B'10111100'   ;D
+003F   34F2           00098                  RETLW  B'11110010'   ;E
+0040   34E2           00099                  RETLW  B'11100010'   ;F
+0041                  00100 INTERNO:
+                      00101 ;AUX
+0041   0AA3           00102                  INCF   AUX,F
+0042   3005           00103                  MOVLW  .5
+0043   0223           00104                  SUBWF  AUX,W
+0044   1D03           00105                  BTFSS  STATUS,Z
+0045   0008           00106                  RETURN
+                      00107 ;UNIDAD
+0046   01A3           00108                  CLRF   AUX
+0047   0AA0           00109                  INCF   UNIDAD,F
+0048   3010           00110                  MOVLW  .16
+0049   0220           00111                  SUBWF  UNIDAD,W
+004A   1D03           00112                  BTFSS  STATUS,Z
+004B   0008           00113                  RETURN
+                      00114 ;DECENA
+004C   01A0           00115                  CLRF   UNIDAD
+004D   0AA1           00116                  INCF   DECENA,F
+004E   3010           00117                  MOVLW  .16
+004F   0221           00118                  SUBWF  DECENA,W
+0050   1D03           00119                  BTFSS  STATUS,Z
+0051   0008           00120                  RETURN         
+                      00121 ;CENTENA
+0052   01A1           00122                  CLRF   DECENA
+0053   0AA2           00123                  INCF   CENTENA,F
+0054   3010           00124                  MOVLW  .16
+0055   0222           00125                  SUBWF  CENTENA,W
+0056   1D03           00126                  BTFSS  STATUS,Z
+0057   0008           00127                  RETURN
+                      00128                  
+0058   01A1           00129                  CLRF   DECENA
+0059   01A0           00130                  CLRF   UNIDAD
+005A   01A2           00131                  CLRF   CENTENA
+005B   0008           00132                  RETURN
+005C                  00133 INT_RB0:
+005C   1C8B           00134                  BTFSS  INTCON,INTF
+005D   2862           00135                  GOTO   LIMPIAR
+005E                  00136 ENCENDER_M1:
+005E   1607           00137                  BSF    MOTOR
+005F   201A           00138                  CALL   VISUALIZAR
+0060   1806           00139                  BTFSC  PULSADOR
+0061   285E           00140                  GOTO   ENCENDER_M1                               
+0062                  00141 LIMPIAR:
+0062   1207           00142                  BCF    MOTOR
+0063   108B           00143                  BCF    INTCON,INTF
+0064   0009           00144                  RETFIE
+                      00145                  INCLUDE <RETARDOS.INC>  
+                      00001 ;**************************** LIBRERÍA "RETARDOS.INC" *********************************
+                      00002 ;
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00003 ;       ===================================================================
+                      00004 ;         DEL LIBRO "MICROCONTROLADOR PIC16F84. DESARROLLO DE PROYECTOS"
+                      00005 ;         E. PALACIOS, F. REMIRO Y L. LÓPEZ.
+                      00006 ;         EDITORIAL RA-MA.  WWW.RA-MA.ES
+                      00007 ;       ===================================================================
+                      00008 ;
+                      00009 ; LIBRERÍA CON MÚLTIPLES SUBRUTINAS DE RETARDOS, DESDE 4 MICROSEGUNDOS HASTA 20 SEGUNDOS. 
+                      00010 ; ADEMÁS SE PUEDEN IMPLEMENTAR OTRAS SUBRUTINAS MUY FÁCILMENTE.
+                      00011 ;
+                      00012 ; SE HAN CALCULADO PARA UN SISTEMA MICROCONTROLADOR CON UN PIC TRABAJANDO CON UN CRISTAL
+                      00013 ; DE CUARZO A 4 MHZ. COMO CADA CICLO MÁQUINA SON 4 CICLOS DE RELOJ, RESULTA QUE CADA
+                      00014 ; CICLO MÁQUINA TARDA 4 X 1/4MHZ = 1 µS.
+                      00015 ;
+                      00016 ; EN LOS COMENTARIOS, "CM" SIGNIFICA "CICLOS MÁQUINA".
+                      00017 ;
+                      00018 ; ZONA DE DATOS *********************************************************************
+                      00019 
+                      00020         CBLOCK     0X0C
+  0000000C            00021         R_CONTA                         ; CONTADORES PARA LOS RETARDOS.
+  0000000D            00022         R_CONTB
+  0000000E            00023         R_CONTC
+                      00024         ENDC
+                      00025 ;
+                      00026 ; RETARDOS DE 4 HASTA 10 MICROSEGUNDOS ---------------------------------------------------
+                      00027 ;
+                      00028 ; A CONTINUACIÓN RETARDOS PEQUEÑOS TENIENDO EN CUENTA QUE PARA UNA FRECUENCIA DE 4 MHZ,
+                      00029 ; LA LLAMADA A SUBRUTINA "CALL" TARDA 2 CICLOS MÁQUINA, EL RETORNO DE SUBRUTINA
+                      00030 ; "RETURN" TOMA OTROS 2 CICLOS MÁQUINA Y CADA INSTRUCCIÓN "NOP" TARDA 1 CICLO MÁQUINA.
+                      00031 ;
+0065                  00032 RETARDO_10MICROS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0065   0000           00033         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0066   0000           00034         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0067   0000           00035         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0068   0000           00036         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0069   0000           00037         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+006A                  00038 RETARDO_5MICROS                             ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+006A   0000           00039         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+006B                  00040 RETARDO_4MICROS                             ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+006B   0008           00041         RETURN                                  ; EL SALTO DEL RETORNO APORTA 2 CICLOS MÁQUINA.
+                      00042 ;
+                      00043 ; RETARDOS DE 20 HASTA 500 MICROSEGUNDOS ------------------------------------------------
+                      00044 ;
+006C                  00045 RETARDO_500MICROS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+006C   0000           00046         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+006D   30A4           00047         MOVLW   D'164'                      ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "K".
+006E   2878           00048         GOTO    RETARDOMICROS           ; APORTA 2 CICLOS MÁQUINA.
+006F                  00049 RETARDO_200MICROS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+006F   0000           00050         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0070   3040           00051         MOVLW   D'64'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "K".
+0071   2878           00052         GOTO    RETARDOMICROS           ; APORTA 2 CICLOS MÁQUINA.
+0072                  00053 RETARDO_100MICROS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0072   301F           00054         MOVLW   D'31'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "K".
+0073   2878           00055         GOTO    RETARDOMICROS           ; APORTA 2 CICLOS MÁQUINA.
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0074                  00056 RETARDO_50MICROS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0074   0000           00057         NOP                                         ; APORTA 1 CICLO MÁQUINA.
+0075   300E           00058         MOVLW   D'14'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "K".
+0076   2878           00059         GOTO    RETARDOMICROS           ; APORTA 2 CICLOS MÁQUINA.
+0077                  00060 RETARDO_20MICROS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0077   3005           00061         MOVLW   D'5'                        ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "K".
+                      00062 ;
+                      00063 ; EL PRÓXIMO BLOQUE "RETARDOMICROS" TARDA:
+                      00064 ; 1 + (K-1) + 2 + (K-1)X2 + 2 = (2 + 3K) CICLOS MÁQUINA.
+                      00065 ;
+0078                  00066 RETARDOMICROS
+0078   008C           00067         MOVWF   R_CONTA                     ; APORTA 1 CICLO MÁQUINA.
+0079                  00068 RMICROS_BUCLE
+0079   0B8C           00069         DECFSZ  R_CONTA,F                   ; (K-1)X1 CM (CUANDO NO SALTA) + 2 CM (AL SALTAR).
+007A   2879           00070         GOTO    RMICROS_BUCLE           ; APORTA (K-1)X2 CICLOS MÁQUINA.
+007B   0008           00071         RETURN                                  ; EL SALTO DEL RETORNO APORTA 2 CICLOS MÁQUINA.
+                      00072 ;
+                      00073 ;EN TOTAL ESTAS SUBRUTINAS TARDAN:
+                      00074 ; - RETARDO_500MICROS:  2 + 1 + 1 + 2 + (2 + 3K) = 500 CM = 500 µS. (PARA K=164 Y 4 MHZ).
+                      00075 ; - RETARDO_200MICROS:  2 + 1 + 1 + 2 + (2 + 3K) = 200 CM = 200 µS. (PARA K= 64 Y 4 MHZ).
+                      00076 ; - RETARDO_100MICROS:  2     + 1 + 2 + (2 + 3K) = 100 CM = 100 µS. (PARA K= 31 Y 4 MHZ).
+                      00077 ; - RETARDO_50MICROS :  2 + 1 + 1 + 2 + (2 + 3K) =  50 CM =  50 µS. (PARA K= 14 Y 4 MHZ).
+                      00078 ; - RETARDO_20MICROS :  2     + 1     + (2 + 3K) =  20 CM =  20 µS. (PARA K=  5 Y 4 MHZ).
+                      00079 ;
+                      00080 ; RETARDOS DE 1 MS HASTA 200 MS. --------------------------------------------------------
+                      00081 ;
+007C                  00082 RETARDO_200MS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+007C   30C8           00083         MOVLW   D'200'                      ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+007D   288B           00084         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+007E                  00085 RETARDO_100MS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+007E   3064           00086         MOVLW   D'100'                      ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+007F   288B           00087         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+0080                  00088 RETARDO_50MS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0080   3032           00089         MOVLW   D'50'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+0081   288B           00090         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+0082                  00091 RETARDO_20MS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0082   3014           00092         MOVLW   D'20'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+0083   288B           00093         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+0084                  00094 RETARDO_10MS                                ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0084   300A           00095         MOVLW   D'10'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+0085   288B           00096         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+0086                  00097 RETARDO_5MS                                     ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0086   3005           00098         MOVLW   D'5'                        ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+0087   288B           00099         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+0088                  00100 RETARDO_2MS                                     ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0088   3002           00101         MOVLW   D'2'                        ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+0089   288B           00102         GOTO    RETARDOS_MS                 ; APORTA 2 CICLOS MÁQUINA.
+008A                  00103 RETARDO_1MS                                     ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+008A   3001           00104         MOVLW   D'1'                        ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "M".
+                      00105 ;
+                      00106 ; EL PRÓXIMO BLOQUE "RETARDOS_MS" TARDA:
+                      00107 ; 1 + M + M + KXM + (K-1)XM + MX2 + (K-1)MX2 + (M-1) + 2 + (M-1)X2 + 2 =
+                      00108 ; = (2 + 4M + 4KM) CICLOS MÁQUINA. PARA K=249 Y M=1 SUPONE 1002 CICLOS MÁQUINA
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00109 ; QUE A 4 MHZ SON 1002 µS = 1 MS.
+                      00110 ;
+008B                  00111 RETARDOS_MS
+008B   008D           00112         MOVWF   R_CONTB                     ; APORTA 1 CICLO MÁQUINA.
+008C                  00113 R1MS_BUCLEEXTERNO
+008C   30F9           00114         MOVLW   D'249'                      ; APORTA MX1 CICLOS MÁQUINA. ESTE ES EL VALOR DE "K".
+008D   008C           00115         MOVWF   R_CONTA                     ; APORTA MX1 CICLOS MÁQUINA.
+008E                  00116 R1MS_BUCLEINTERNO
+008E   0000           00117         NOP                                         ; APORTA KXMX1 CICLOS MÁQUINA.
+008F   0B8C           00118         DECFSZ  R_CONTA,F                   ; (K-1)XMX1 CM (CUANDO NO SALTA) + MX2 CM (AL SALTAR).
+0090   288E           00119         GOTO    R1MS_BUCLEINTERNO               ; APORTA (K-1)XMX2 CICLOS MÁQUINA.
+0091   0B8D           00120         DECFSZ  R_CONTB,F                   ; (M-1)X1 CM (CUANDO NO SALTA) + 2 CM (AL SALTAR).
+0092   288C           00121         GOTO    R1MS_BUCLEEXTERNO       ; APORTA (M-1)X2 CICLOS MÁQUINA.
+0093   0008           00122         RETURN                                  ; EL SALTO DEL RETORNO APORTA 2 CICLOS MÁQUINA.
+                      00123 ;
+                      00124 ;EN TOTAL ESTAS SUBRUTINAS TARDAN:
+                      00125 ; - RETARDO_200MS:      2 + 1 + 2 + (2 + 4M + 4KM) = 200007 CM = 200 MS. (M=200 Y K=249).
+                      00126 ; - RETARDO_100MS:      2 + 1 + 2 + (2 + 4M + 4KM) = 100007 CM = 100 MS. (M=100 Y K=249).
+                      00127 ; - RETARDO_50MS :      2 + 1 + 2 + (2 + 4M + 4KM) =  50007 CM =  50 MS. (M= 50 Y K=249).
+                      00128 ; - RETARDO_20MS :      2 + 1 + 2 + (2 + 4M + 4KM) =  20007 CM =  20 MS. (M= 20 Y K=249).
+                      00129 ; - RETARDO_10MS :      2 + 1 + 2 + (2 + 4M + 4KM) =  10007 CM =  10 MS. (M= 10 Y K=249).
+                      00130 ; - RETARDO_5MS  :      2 + 1 + 2 + (2 + 4M + 4KM) =   5007 CM =   5 MS. (M=  5 Y K=249).
+                      00131 ; - RETARDO_2MS  :      2 + 1 + 2 + (2 + 4M + 4KM) =   2007 CM =   2 MS. (M=  2 Y K=249).
+                      00132 ; - RETARDO_1MS  :      2 + 1     + (2 + 4M + 4KM) =   1005 CM =   1 MS. (M=  1 Y K=249).
+                      00133 ;
+                      00134 ; RETARDOS DE 0.5 HASTA 20 SEGUNDOS ---------------------------------------------------
+                      00135 ;
+0094                  00136 RETARDO_20S                                     ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0094   30C8           00137         MOVLW   D'200'                      ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+0095   289F           00138         GOTO    RETARDO_1DECIMA         ; APORTA 2 CICLOS MÁQUINA.
+0096                  00139 RETARDO_10S                                     ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0096   3064           00140         MOVLW   D'100'                      ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+0097   289F           00141         GOTO    RETARDO_1DECIMA         ; APORTA 2 CICLOS MÁQUINA.
+0098                  00142 RETARDO_5S                                      ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+0098   3032           00143         MOVLW   D'50'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+0099   289F           00144         GOTO    RETARDO_1DECIMA         ; APORTA 2 CICLOS MÁQUINA.
+009A                  00145 RETARDO_2S                                      ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+009A   3014           00146         MOVLW   D'20'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+009B   289F           00147         GOTO    RETARDO_1DECIMA         ; APORTA 2 CICLOS MÁQUINA.
+009C                  00148 RETARDO_1S                                      ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+009C   300A           00149         MOVLW   D'10'                       ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+009D   289F           00150         GOTO    RETARDO_1DECIMA         ; APORTA 2 CICLOS MÁQUINA.
+009E                  00151 RETARDO_500MS                               ; LA LLAMADA "CALL" APORTA 2 CICLOS MÁQUINA.
+009E   3005           00152         MOVLW   D'5'                        ; APORTA 1 CICLO MÁQUINA. ESTE ES EL VALOR DE "N".
+                      00153 ;
+                      00154 ; EL PRÓXIMO BLOQUE "RETARDO_1DECIMA" TARDA:
+                      00155 ; 1 + N + N + MXN + MXN + KXMXN + (K-1)XMXN + MXNX2 + (K-1)XMXNX2 +
+                      00156 ;   + (M-1)XN + NX2 + (M-1)XNX2 + (N-1) + 2 + (N-1)X2 + 2 =
+                      00157 ; = (2 + 4M + 4MN + 4KM) CICLOS MÁQUINA. PARA K=249, M=100 Y N=1 SUPONE 100011
+                      00158 ; CICLOS MÁQUINA QUE A 4 MHZ SON 100011 µS = 100 MS = 0,1 S = 1 DÉCIMA DE SEGUNDO.
+                      00159 ;
+009F                  00160 RETARDO_1DECIMA
+009F   008E           00161         MOVWF   R_CONTC                     ; APORTA 1 CICLO MÁQUINA.
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00A0                  00162 R1DECIMA_BUCLEEXTERNO2
+00A0   3064           00163         MOVLW   D'100'                      ; APORTA NX1 CICLOS MÁQUINA. ESTE ES EL VALOR DE "M".
+00A1   008D           00164         MOVWF   R_CONTB                     ; APORTA NX1 CICLOS MÁQUINA.
+00A2                  00165 R1DECIMA_BUCLEEXTERNO
+00A2   30F9           00166         MOVLW   D'249'                      ; APORTA MXNX1 CICLOS MÁQUINA. ESTE ES EL VALOR DE "K".
+00A3   008C           00167         MOVWF   R_CONTA                     ; APORTA MXNX1 CICLOS MÁQUINA.
+00A4                  00168 R1DECIMA_BUCLEINTERNO          
+00A4   0000           00169         NOP                                         ; APORTA KXMXNX1 CICLOS MÁQUINA.
+00A5   0B8C           00170         DECFSZ  R_CONTA,F                   ; (K-1)XMXNX1 CM (SI NO SALTA) + MXNX2 CM (AL SALTAR).
+00A6   28A4           00171         GOTO    R1DECIMA_BUCLEINTERNO   ; APORTA (K-1)XMXNX2 CICLOS MÁQUINA.
+00A7   0B8D           00172         DECFSZ  R_CONTB,F                   ; (M-1)XNX1 CM (CUANDO NO SALTA) + NX2 CM (AL SALTAR).
+00A8   28A2           00173         GOTO    R1DECIMA_BUCLEEXTERNO   ; APORTA (M-1)XNX2 CICLOS MÁQUINA.
+00A9   0B8E           00174         DECFSZ  R_CONTC,F                   ; (N-1)X1 CM (CUANDO NO SALTA) + 2 CM (AL SALTAR).
+00AA   28A0           00175         GOTO    R1DECIMA_BUCLEEXTERNO2  ; APORTA (N-1)X2 CICLOS MÁQUINA.
+00AB   0008           00176         RETURN                                  ; EL SALTO DEL RETORNO APORTA 2 CICLOS MÁQUINA.
+                      00177 ;
+                      00178 ;EN TOTAL ESTAS SUBRUTINAS TARDAN:
+                      00179 ; - RETARDO_20S:        2 + 1 + 2 + (2 + 4N + 4MN + 4KMN) = 20000807 CM = 20 S.
+                      00180 ;                       (N=200, M=100 Y K=249).
+                      00181 ; - RETARDO_10S:        2 + 1 + 2 + (2 + 4N + 4MN + 4KMN) = 10000407 CM = 10 S.
+                      00182 ;                       (N=100, M=100 Y K=249).
+                      00183 ; - RETARDO_5S:         2 + 1 + 2 + (2 + 4N + 4MN + 4KMN) =  5000207 CM =  5 S.
+                      00184 ;                       (N= 50, M=100 Y K=249).
+                      00185 ; - RETARDO_2S:         2 + 1 + 2 + (2 + 4N + 4MN + 4KMN) =  2000087 CM =  2 S.
+                      00186 ;                       (N= 20, M=100 Y K=249).
+                      00187 ; - RETARDO_1S:         2 + 1 + 2 + (2 + 4N + 4MN + 4KMN) =  1000047 CM =  1 S.
+                      00188 ;                       (N= 10, M=100 Y K=249).
+                      00189 ; - RETARDO_500MS:      2 + 1     + (2 + 4N + 4MN + 4KMN) =   500025 CM = 0,5 S.
+                      00190 ;                       (N=  5, M=100 Y K=249).
+                      00191 
+                      00192 ;       ===================================================================
+                      00193 ;         DEL LIBRO "MICROCONTROLADOR PIC16F84. DESARROLLO DE PROYECTOS"
+                      00194 ;         E. PALACIOS, F. REMIRO Y L. LÓPEZ.
+                      00195 ;         EDITORIAL RA-MA.  WWW.RA-MA.ES
+                      00196 ;       ===================================================================
+                      00146    END
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+AUX                               00000023
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+BUCLE                             00000017
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CENTENA                           00000022
+CHS0                              00000003
+CHS1                              00000004
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+CONFIGURAR                        00000005
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DECENA                            00000021
+DISPLAY1                          PORTC,1
+DISPLAY2                          PORTC,2
+DISPLAY3                          PORTC,3
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ENCENDER_M1                       0000005E
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTERNO                           00000041
+INTF                              00000001
+INT_RB0                           0000005C
+IRP                               00000007
+LIMPIAR                           00000062
+MAIN                              00000014
+MOTOR                             PORTC,4
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+PULSADOR                          PORTB,0
+R                                 00000002
+R1DECIMA_BUCLEEXTERNO             000000A2
+R1DECIMA_BUCLEEXTERNO2            000000A0
+R1DECIMA_BUCLEINTERNO             000000A4
+R1MS_BUCLEEXTERNO                 0000008C
+R1MS_BUCLEINTERNO                 0000008E
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RE2                               00000002
+READ_WRITE                        00000002
+RETARDOMICROS                     00000078
+RETARDOS_MS                       0000008B
+RETARDO_100MICROS                 00000072
+RETARDO_100MS                     0000007E
+RETARDO_10MICROS                  00000065
+RETARDO_10MS                      00000084
+RETARDO_10S                       00000096
+RETARDO_1DECIMA                   0000009F
+RETARDO_1MS                       0000008A
+RETARDO_1S                        0000009C
+RETARDO_200MICROS                 0000006F
+RETARDO_200MS                     0000007C
+RETARDO_20MICROS                  00000077
+RETARDO_20MS                      00000082
+RETARDO_20S                       00000094
+RETARDO_2MS                       00000088
+RETARDO_2S                        0000009A
+RETARDO_4MICROS                   0000006B
+RETARDO_500MICROS                 0000006C
+RETARDO_500MS                     0000009E
+RETARDO_50MICROS                  00000074
+RETARDO_50MS                      00000080
+RETARDO_5MICROS                   0000006A
+RETARDO_5MS                       00000086
+RETARDO_5S                        00000098
+RMICROS_BUCLE                     00000079
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_CONTA                           0000000C
+R_CONTB                           0000000D
+R_CONTC                           0000000E
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STAR                              PORTC,0
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TABLA                             00000030
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+UNIDAD                            00000020
+VISUALIZAR                        0000001A
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+MPASM  5.51            CONTADOR HEX Y INT.ASM   11-20-2024  13:55:13         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+__DEBUG                           1
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXX---- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   169
+Program Memory Words Free:  8023
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     3 reported,     0 suppressed
+
+

@@ -1,0 +1,24 @@
+[PROJECT]
+Target=TABLA_DEL_9_LCD.hex
+Processor_Text=PIC16F877A
+CCSVersion=5.015
+Compiler=PCM
+[Target Data]
+FileList=TABLA_DEL_9_LCD.c
+[Directories]
+Include=C:\Program Files (x86)\PICC\Devices\;C:\Program Files (x86)\PICC\Drivers\
+[TABLA_DEL_9_LCD.c]
+Type=4
+[mru-list]
+1=TABLA_DEL_9_LCD.c
+[Opened Files]
+1=C:\Users\USUARIO\Desktop\LENGUAJE C\SEÑAL ANALOGA\ADC TERMOCUPLA J.c
+2=C:\Program Files (x86)\PICC\Drivers\lcd8bits.c
+3=C:\Users\USUARIO\Desktop\LENGUAJE C\6\ej6.c
+4=C:\Users\USUARIO\Desktop\LENGUAJE C\PIC C COMPILER\LCD.c
+5=C:\Users\USUARIO\Desktop\LENGUAJE C\LCD 8 BITS\LCD CON 8 BITS.c
+6=TABLA_DEL_9_LCD.c
+7=
+[Units]
+Count=1
+1=TABLA_DEL_9_LCD (main)
